@@ -49,14 +49,29 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* 水墨禅意主色 */
+  --ink:        #3d2c1e;
+  --gold:       #d6b887;
+  --paper:      #faf8f4;
+  --paper-dark: #f0ebe1;
+
+  /* 高亮色 */
+  --hl-yellow:  #fef08a;
+  --hl-red:     #fca5a5;
+  --hl-blue:    #93c5fd;
+  --hl-green:   #86efac;
+
+  /* shadcn 变量覆盖为水墨调色板 */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --primary:    var(--ink);
+  --primary-foreground: var(--paper);
+  --ring: var(--gold);
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -66,7 +81,6 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -84,8 +98,8 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --background: #1a1208;
+  --foreground: #e8dcc8;
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -123,8 +137,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Noto Serif SC', 'Source Han Serif CN', serif;
   }
   html {
     @apply font-sans;
   }
 }
+
+.hl-yellow { background: var(--hl-yellow); }
+.hl-red    { background: var(--hl-red); }
+.hl-blue   { background: var(--hl-blue); }
+.hl-green  { background: var(--hl-green); }
