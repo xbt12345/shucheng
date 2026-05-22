@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const CATEGORIES = ['全部', '儒', '释', '道', '史', '集']
+const CATEGORIES = ['全部', '儒', '释', '道', '史', '集', '哲', '文']
 
 export function CategoryTabs() {
   const router = useRouter()

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * 统一封面图片组件
  * - Supabase Storage: 用 Next.js Image（优化）
