@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 type Props = {
@@ -11,10 +10,15 @@ type Props = {
   showRating?: boolean
 }
 
-export function CommentForm({ bookId, onSuccess, placeholder = '写下你的书评...', showRating = true }: Props) {
+const STAR_LABELS = ['', '很差', '较差', '一般', '推荐', '力荐']
+
+export function CommentForm({ bookId, onSuccess, placeholder = '写下你的感悟与书评...', showRating = true }: Props) {
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(0)
+  const [hovered, setHovered] = useState(0)
   const [submitting, setSubmitting] = useState(false)
+
+  const displayRating = hovered || rating
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,32 +44,69 @@ export function CommentForm({ bookId, onSuccess, placeholder = '写下你的书�
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {showRating && (
-        <div className="flex gap-1">
-          {[1,2,3,4,5].map(s => (
-            <button key={s} type="button" onClick={() => setRating(s)}
-              className={`text-2xl transition-colors ${s <= rating ? 'text-[--gold]' : 'text-gray-300'}`}>
-              ★
-            </button>
-          ))}
-          {rating > 0 && <span className="text-sm text-gray-500 ml-2">{rating} 星</span>}
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map(s => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setRating(s)}
+                onMouseEnter={() => setHovered(s)}
+                onMouseLeave={() => setHovered(0)}
+                className={`text-3xl transition-all duration-100 hover:scale-110 ${
+                  s <= displayRating ? 'text-[--gold] drop-shadow-sm' : 'text-gray-200 hover:text-gray-300'
+                }`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+          <span className={`text-sm font-medium transition-colors ${
+            displayRating > 0 ? 'text-[--gold]' : 'text-gray-400'
+          }`}>
+            {displayRating > 0 ? STAR_LABELS[displayRating] : '点击评分'}
+          </span>
         </div>
       )}
-      <textarea
-        value={content}
-        onChange={e => setContent(e.target.value)}
-        placeholder={placeholder}
-        className="w-full h-24 border border-[--border] rounded-lg p-3 text-sm
-          resize-none focus:outline-none focus:ring-1 focus:ring-[--gold]"
-        maxLength={2000}
-      />
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-gray-400">{content.length}/2000</span>
-        <Button type="submit" size="sm" className="bg-[--ink] text-[--paper]"
-          disabled={submitting || !content.trim()}>
-          {submitting ? '发布中...' : '发布书评'}
-        </Button>
+
+      <div className="relative">
+        <textarea
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          placeholder={placeholder}
+          className="w-full h-28 border-2 border-[--paper-dark] rounded-xl p-4 text-sm
+            resize-none transition-colors
+            focus:outline-none focus:border-[--gold]/50 focus:bg-white
+            bg-[--paper-dark]/50 placeholder-gray-400"
+          maxLength={2000}
+        />
+        <span className="absolute bottom-3 right-3 text-xs text-gray-300">
+          {content.length}/2000
+        </span>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={submitting || !content.trim()}
+          className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-150
+            disabled:opacity-40 disabled:cursor-not-allowed
+            bg-[--ink] text-[--paper]
+            hover:bg-[--gold] hover:text-[--ink]
+            active:scale-95 shadow hover:shadow-md"
+        >
+          {submitting ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              发布中
+            </span>
+          ) : '发布书评'}
+        </button>
       </div>
     </form>
   )
