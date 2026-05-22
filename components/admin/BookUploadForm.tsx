@@ -9,32 +9,45 @@ import { toast } from 'sonner'
 
 const CATEGORIES = ['儒', '释', '道', '史', '集']
 
+// 生成安全的存储路径，避免中文/特殊字符导致 Invalid key 错误
+function safeStoragePath(file: File): string {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
+  const id = crypto.randomUUID()
+  return `${id}.${ext}`
+}
+
 export function BookUploadForm() {
   const [form, setForm] = useState({
     title: '', author: '', category: '儒', description: '', publishedAt: '',
   })
-  const [epubFile, setEpubFile] = useState<File | null>(null)
+  const [bookFile, setBookFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const supabase = createClient()
 
-  const uploadFile = async (file: File, bucket: string, path: string): Promise<string> => {
+  const uploadFile = async (file: File, bucket: string): Promise<string> => {
+    const path = safeStoragePath(file)
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-    if (error) throw error
+    if (error) throw new Error(error.message)
     return path
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!epubFile) { toast.error('epub 文件必须上传'); return }
+    if (!bookFile) { toast.error('书籍文件必须上传（epub 或 pdf）'); return }
+
+    const ext = bookFile.name.split('.').pop()?.toLowerCase()
+    if (ext !== 'epub' && ext !== 'pdf') {
+      toast.error('仅支持 .epub 或 .pdf 格式')
+      return
+    }
 
     setUploading(true)
     try {
-      const timestamp = Date.now()
-      const fileUrl = await uploadFile(epubFile, 'books', `${timestamp}-${epubFile.name}`)
+      const fileUrl = await uploadFile(bookFile, 'books')
       let coverUrl: string | null = null
       if (coverFile) {
-        coverUrl = await uploadFile(coverFile, 'covers', `${timestamp}-${coverFile.name}`)
+        coverUrl = await uploadFile(coverFile, 'covers')
       }
 
       const res = await fetch('/api/admin/books', {
@@ -50,8 +63,9 @@ export function BookUploadForm() {
 
       toast.success('书籍上传成功！')
       setForm({ title: '', author: '', category: '儒', description: '', publishedAt: '' })
-      setEpubFile(null)
+      setBookFile(null)
       setCoverFile(null)
+      ;(e.target as HTMLFormElement).reset()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '上传失败'
       toast.error('上传失败', { description: msg })
@@ -88,9 +102,14 @@ export function BookUploadForm() {
           placeholder="书籍简介" />
       </div>
       <div className="space-y-2">
-        <Label>epub 文件 *</Label>
-        <Input type="file" accept=".epub"
-          onChange={e => setEpubFile(e.target.files?.[0] ?? null)} required />
+        <Label>书籍文件 * <span className="text-xs text-muted-foreground ml-1">支持 .epub / .pdf</span></Label>
+        <Input type="file" accept=".epub,.pdf"
+          onChange={e => setBookFile(e.target.files?.[0] ?? null)} required />
+        {bookFile && (
+          <p className="text-xs text-muted-foreground">
+            已选：{bookFile.name}（{(bookFile.size / 1024 / 1024).toFixed(1)} MB）
+          </p>
+        )}
       </div>
       <div className="space-y-2">
         <Label>封面图片</Label>
