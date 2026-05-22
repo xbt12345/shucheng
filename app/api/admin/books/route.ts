@@ -20,16 +20,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '标题、作者、分类、文件路径必填' }, { status: 400 })
   }
 
+  const nullIfEmpty = (v: unknown) => (v === '' || v == null ? null : v)
+
   // Use admin client to bypass RLS for insert
   const admin = createAdminClient()
   const { data, error } = await admin.from('books').insert({
     title,
     author,
     category,
-    description: description ?? null,
-    cover_url: coverUrl ?? null,
+    description: nullIfEmpty(description),
+    cover_url: nullIfEmpty(coverUrl),
     file_url: fileUrl,
-    published_at: publishedAt ?? null,
+    published_at: nullIfEmpty(publishedAt),
     is_public: isPublic ?? true,
   }).select().single()
 
