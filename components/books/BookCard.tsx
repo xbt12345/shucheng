@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { BookCover } from './BookCover'
 import { coverSrc, CATEGORY_COLORS } from '@/lib/utils'
 
 export type Book = {
@@ -16,39 +16,22 @@ export type Book = {
   created_at: string
 }
 
-const CAT_BG: Record<string, string> = {
-  儒: 'bg-amber-900',
-  释: 'bg-purple-900',
-  道: 'bg-teal-900',
-  史: 'bg-blue-900',
-  集: 'bg-rose-900',
-  哲: 'bg-indigo-900',
-  文: 'bg-emerald-900',
-}
-
 export function BookCard({ book }: { book: Book }) {
   const src = coverSrc(book.cover_url)
-  const catBg = CAT_BG[book.category] ?? 'bg-stone-800'
 
   return (
     <Link href={`/books/${book.id}`} className="group block">
       <div className="bg-white border border-[--border] rounded-xl overflow-hidden
         hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
         {/* 封面 */}
-        <div className="aspect-[3/4] overflow-hidden">
-          {src ? (
-            <Image src={src} alt={book.title} width={200} height={280}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-          ) : (
-            <div className={`w-full h-full ${catBg} flex flex-col items-center justify-center p-3`}>
-              <span className="text-4xl sm:text-5xl font-bold text-white/90 font-serif mb-1">
-                {book.title[0]}
-              </span>
-              <span className="text-[10px] text-white/50 text-center line-clamp-2 leading-tight">
-                {book.title}
-              </span>
-            </div>
-          )}
+        <div className="aspect-[3/4] relative overflow-hidden">
+          <BookCover
+            src={src}
+            alt={book.title}
+            category={book.category}
+            fill
+            className="group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
         {/* 信息 */}

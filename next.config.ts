@@ -10,19 +10,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-      },
-      {
-        protocol: 'https',
         hostname: 'covers.openlibrary.org',
       },
       {
         protocol: 'https',
-        hostname: '*.wikipedia.org',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images-na.ssl-images-amazon.com',
+        hostname: '*.archive.org',
       },
     ],
   },
