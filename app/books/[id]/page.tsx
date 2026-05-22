@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { BookDetail } from '@/components/books/BookDetail'
+import { CommentList } from '@/components/community/CommentList'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
@@ -29,6 +30,7 @@ export default async function BookDetailPage({ params }: Props) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <BookDetail book={book} />
+      <CommentList bookId={id} />
     </div>
   )
 }
