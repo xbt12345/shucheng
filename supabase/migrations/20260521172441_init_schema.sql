@@ -1,9 +1,4 @@
 -- =====================
--- 扩展
--- =====================
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- =====================
 -- profiles（用户信息）
 -- =====================
 CREATE TABLE profiles (
@@ -35,7 +30,7 @@ CREATE TRIGGER on_auth_user_created
 -- books（书籍）
 -- =====================
 CREATE TABLE books (
-  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title        TEXT NOT NULL,
   author       TEXT NOT NULL,
   category     TEXT NOT NULL CHECK (category IN ('儒','释','道','史','集')),
@@ -52,7 +47,7 @@ CREATE TABLE books (
 -- chapters（章节）
 -- =====================
 CREATE TABLE chapters (
-  id        UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   book_id   UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
   title     TEXT NOT NULL,
   order_num INT NOT NULL,
@@ -63,7 +58,7 @@ CREATE TABLE chapters (
 -- highlights（高亮标注）
 -- =====================
 CREATE TABLE highlights (
-  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   book_id     UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
   chapter_id  UUID REFERENCES chapters(id) ON DELETE SET NULL,
@@ -83,7 +78,7 @@ CREATE INDEX idx_highlights_user ON highlights(user_id);
 -- comments（评论/书评）
 -- =====================
 CREATE TABLE comments (
-  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   book_id      UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
   highlight_id UUID REFERENCES highlights(id) ON DELETE CASCADE,
@@ -101,7 +96,7 @@ CREATE INDEX idx_comments_highlight ON comments(highlight_id);
 -- booklists（书单）
 -- =====================
 CREATE TABLE booklists (
-  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title       TEXT NOT NULL,
   description TEXT,
@@ -133,7 +128,7 @@ CREATE INDEX idx_follows_following ON follows(following_id);
 -- reading_logs（阅读记录/打卡）
 -- =====================
 CREATE TABLE reading_logs (
-  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   book_id      UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
   progress_cfi TEXT,
@@ -148,7 +143,7 @@ CREATE INDEX idx_reading_logs_user_date ON reading_logs(user_id, logged_at);
 -- circles（话题圈）
 -- =====================
 CREATE TABLE circles (
-  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name         TEXT NOT NULL,
   description  TEXT,
   book_id      UUID REFERENCES books(id) ON DELETE SET NULL,
