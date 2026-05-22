@@ -3,6 +3,8 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useReaderStore } from '@/stores/reader'
 import { ReaderToolbar } from './ReaderToolbar'
+import { HighlightMenu } from './HighlightMenu'
+import { HighlightLayer } from './HighlightLayer'
 
 const themeStyles = {
   paper: { body: { background: '#faf8f4', color: '#3d2c1e', 'line-height': '1.9' } },
@@ -83,6 +85,8 @@ export function EpubReader({ epubUrl, bookId, initialCfi }: Props) {
       <ReaderToolbar bookId={bookId} />
       <div className="flex-1 relative">
         <div ref={containerRef} className="w-full h-full" />
+        <HighlightMenu bookId={bookId} rendition={renditionRef} />
+        <HighlightLayer bookId={bookId} rendition={renditionRef} />
         <button onClick={goPrev}
           className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-20
             flex items-center justify-center text-gray-400 hover:text-[--ink]
