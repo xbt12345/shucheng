@@ -2,6 +2,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+
+function coverSrc(path: string | null): string | null {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`
+}
+
 export type Book = {
   id: string
   title: string
@@ -29,9 +37,9 @@ export function BookCard({ book }: { book: Book }) {
     <Link href={`/books/${book.id}`} className="group block">
       <div className="bg-white border border-[--border] rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
         <div className="aspect-[3/4] bg-[--paper-dark] flex items-center justify-center overflow-hidden">
-          {book.cover_url ? (
+          {coverSrc(book.cover_url) ? (
             <Image
-              src={book.cover_url}
+              src={coverSrc(book.cover_url)!}
               alt={book.title}
               width={200}
               height={280}

@@ -4,6 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { Book } from './BookCard'
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+
+function coverSrc(path: string | null): string | null {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`
+}
+
 const categoryColors: Record<string, string> = {
   儒: 'bg-amber-100 text-amber-800',
   释: 'bg-purple-100 text-purple-800',
@@ -18,8 +26,8 @@ export function BookDetail({ book }: { book: Book }) {
       <div className="flex-shrink-0">
         <div className="w-40 h-56 bg-[--paper-dark] rounded-lg overflow-hidden flex
           items-center justify-center">
-          {book.cover_url ? (
-            <Image src={book.cover_url} alt={book.title}
+          {coverSrc(book.cover_url) ? (
+            <Image src={coverSrc(book.cover_url)!} alt={book.title}
               width={160} height={224} className="w-full h-full object-cover" />
           ) : (
             <div className="text-center p-4">

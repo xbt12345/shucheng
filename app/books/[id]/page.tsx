@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { BookDetail } from '@/components/books/BookDetail'
 import { CommentList } from '@/components/community/CommentList'
+import { AddToBooklistButton } from '@/components/booklists/AddToBooklistButton'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
@@ -27,9 +28,18 @@ export default async function BookDetailPage({ params }: Props) {
   // 增加浏览量（ignore error if RPC not ready）
   await Promise.resolve(supabase.rpc('increment_view_count', { book_id: id })).catch(() => {})
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <BookDetail book={book} />
+      <div className="relative">
+        <BookDetail book={book} />
+        {user && (
+          <div className="absolute bottom-0 right-0">
+            <AddToBooklistButton bookId={id} />
+          </div>
+        )}
+      </div>
       <CommentList bookId={id} />
     </div>
   )

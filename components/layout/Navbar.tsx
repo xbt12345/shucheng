@@ -31,6 +31,9 @@ export function Navbar() {
         </Link>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/books" className="hover:text-[--gold] transition-colors">书库</Link>
+          <Link href="/discover" className="hover:text-[--gold] transition-colors">发现</Link>
+          <Link href="/booklists" className="hover:text-[--gold] transition-colors">书单</Link>
+          <Link href="/circles" className="hover:text-[--gold] transition-colors">话题圈</Link>
           <Link href="/community" className="hover:text-[--gold] transition-colors">社区</Link>
           {user ? (
             <>
