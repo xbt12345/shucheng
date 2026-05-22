@@ -1,14 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-
-function coverSrc(path: string | null): string | null {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`
-}
+import { coverSrc, CATEGORY_COLORS } from '@/lib/utils'
 
 export type Book = {
   id: string
@@ -24,27 +17,15 @@ export type Book = {
   created_at: string
 }
 
-const categoryColors: Record<string, string> = {
-  儒: 'bg-amber-100 text-amber-800',
-  释: 'bg-purple-100 text-purple-800',
-  道: 'bg-teal-100 text-teal-800',
-  史: 'bg-blue-100 text-blue-800',
-  集: 'bg-rose-100 text-rose-800',
-}
-
 export function BookCard({ book }: { book: Book }) {
+  const src = coverSrc(book.cover_url)
   return (
     <Link href={`/books/${book.id}`} className="group block">
       <div className="bg-white border border-[--border] rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
         <div className="aspect-[3/4] bg-[--paper-dark] flex items-center justify-center overflow-hidden">
-          {coverSrc(book.cover_url) ? (
-            <Image
-              src={coverSrc(book.cover_url)!}
-              alt={book.title}
-              width={200}
-              height={280}
-              className="w-full h-full object-cover"
-            />
+          {src ? (
+            <Image src={src} alt={book.title} width={200} height={280}
+              className="w-full h-full object-cover" />
           ) : (
             <div className="text-center p-4">
               <div className="text-5xl">📖</div>
@@ -52,7 +33,7 @@ export function BookCard({ book }: { book: Book }) {
           )}
         </div>
         <div className="p-3">
-          <Badge className={`text-xs mb-1 ${categoryColors[book.category] ?? ''}`}>
+          <Badge className={`text-xs mb-1 ${CATEGORY_COLORS[book.category] ?? ''}`}>
             {book.category}
           </Badge>
           <h3 className="font-medium text-[--ink] line-clamp-1 group-hover:text-[--gold] transition-colors">

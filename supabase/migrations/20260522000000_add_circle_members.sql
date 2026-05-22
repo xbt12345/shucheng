@@ -10,11 +10,17 @@ CREATE TABLE IF NOT EXISTS circle_members (
 
 ALTER TABLE circle_members ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "circle_members_select" ON circle_members FOR SELECT USING (TRUE);
-CREATE POLICY "circle_members_insert" ON circle_members
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "circle_members_delete" ON circle_members
-  FOR DELETE USING (auth.uid() = user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='circle_members' AND policyname='circle_members_select') THEN
+    CREATE POLICY "circle_members_select" ON circle_members FOR SELECT USING (TRUE);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='circle_members' AND policyname='circle_members_insert') THEN
+    CREATE POLICY "circle_members_insert" ON circle_members FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='circle_members' AND policyname='circle_members_delete') THEN
+    CREATE POLICY "circle_members_delete" ON circle_members FOR DELETE USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- RPC：加入圈子（插入成员 + member_count++）
 CREATE OR REPLACE FUNCTION join_circle(p_circle_id UUID)

@@ -2,33 +2,18 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { coverSrc, CATEGORY_COLORS } from '@/lib/utils'
 import type { Book } from './BookCard'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-
-function coverSrc(path: string | null): string | null {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${SUPABASE_URL}/storage/v1/object/public/covers/${path}`
-}
-
-const categoryColors: Record<string, string> = {
-  儒: 'bg-amber-100 text-amber-800',
-  释: 'bg-purple-100 text-purple-800',
-  道: 'bg-teal-100 text-teal-800',
-  史: 'bg-blue-100 text-blue-800',
-  集: 'bg-rose-100 text-rose-800',
-}
-
 export function BookDetail({ book }: { book: Book }) {
+  const src = coverSrc(book.cover_url)
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="flex-shrink-0">
-        <div className="w-40 h-56 bg-[--paper-dark] rounded-lg overflow-hidden flex
-          items-center justify-center">
-          {coverSrc(book.cover_url) ? (
-            <Image src={coverSrc(book.cover_url)!} alt={book.title}
-              width={160} height={224} className="w-full h-full object-cover" />
+        <div className="w-40 h-56 bg-[--paper-dark] rounded-lg overflow-hidden flex items-center justify-center">
+          {src ? (
+            <Image src={src} alt={book.title} width={160} height={224}
+              className="w-full h-full object-cover" />
           ) : (
             <div className="text-center p-4">
               <div className="text-5xl mb-2">📖</div>
@@ -38,7 +23,7 @@ export function BookDetail({ book }: { book: Book }) {
       </div>
 
       <div className="flex-1">
-        <Badge className={`mb-2 ${categoryColors[book.category] ?? ''}`}>
+        <Badge className={`mb-2 ${CATEGORY_COLORS[book.category] ?? ''}`}>
           {book.category}
         </Badge>
         <h1 className="text-3xl font-bold text-[--ink] mb-1">{book.title}</h1>
@@ -46,7 +31,7 @@ export function BookDetail({ book }: { book: Book }) {
         {book.description && (
           <p className="text-gray-700 leading-relaxed mb-6">{book.description}</p>
         )}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           {book.file_url ? (
             <Link href={`/books/${book.id}/read`}>
               <Button className="bg-[--ink] text-[--paper] hover:bg-[--gold] hover:text-[--ink]">
@@ -58,7 +43,7 @@ export function BookDetail({ book }: { book: Book }) {
           )}
         </div>
         <p className="text-xs text-gray-400 mt-4">
-          已有 {book.view_count} 人阅读
+          已有 {book.view_count.toLocaleString()} 人阅读
           {book.is_public && ' · 公版经典，永久免费'}
         </p>
       </div>

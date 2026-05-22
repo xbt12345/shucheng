@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { BookGrid } from '@/components/books/BookGrid'
 import { CategoryTabs } from '@/components/books/CategoryTabs'
+import { SearchBar } from '@/components/books/SearchBar'
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 
@@ -30,9 +31,17 @@ export default async function BooksPage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[--ink]">书库</h1>
+        <Suspense>
+          <SearchBar />
+        </Suspense>
       </div>
+      {q && (
+        <p className="text-sm text-gray-500 mb-3">
+          搜索「<span className="text-[--ink] font-medium">{q}</span>」共 {books?.length ?? 0} 部
+        </p>
+      )}
       <Suspense>
         <CategoryTabs />
       </Suspense>
