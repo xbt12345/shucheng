@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,11 +8,18 @@ import { toast } from 'sonner'
 
 const CATEGORIES = ['儒', '释', '道', '史', '集']
 
-// 生成安全的存储路径，避免中文/特殊字符导致 Invalid key 错误
-function safeStoragePath(file: File): string {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
-  const id = crypto.randomUUID()
-  return `${id}.${ext}`
+// 通过服务端 API 上传文件（使用 service role key 绕过 RLS）
+async function uploadViaApi(file: File, bucket: string): Promise<string> {
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('bucket', bucket)
+  const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+  if (!res.ok) {
+    const { error } = await res.json()
+    throw new Error(error ?? '上传失败')
+  }
+  const { path } = await res.json()
+  return path
 }
 
 export function BookUploadForm() {
@@ -23,14 +29,6 @@ export function BookUploadForm() {
   const [bookFile, setBookFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const supabase = createClient()
-
-  const uploadFile = async (file: File, bucket: string): Promise<string> => {
-    const path = safeStoragePath(file)
-    const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-    if (error) throw new Error(error.message)
-    return path
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,10 +42,10 @@ export function BookUploadForm() {
 
     setUploading(true)
     try {
-      const fileUrl = await uploadFile(bookFile, 'books')
+      const fileUrl = await uploadViaApi(bookFile, 'books')
       let coverUrl: string | null = null
       if (coverFile) {
-        coverUrl = await uploadFile(coverFile, 'covers')
+        coverUrl = await uploadViaApi(coverFile, 'covers')
       }
 
       const res = await fetch('/api/admin/books', {

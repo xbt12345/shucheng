@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin-check'
 import { NextResponse } from 'next/server'
 
@@ -19,7 +20,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '标题、作者、分类、文件路径必填' }, { status: 400 })
   }
 
-  const { data, error } = await supabase.from('books').insert({
+  // Use admin client to bypass RLS for insert
+  const admin = createAdminClient()
+  const { data, error } = await admin.from('books').insert({
     title,
     author,
     category,
