@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { JoinCircleButton } from '@/components/circles/JoinCircleButton'
 import type { Metadata } from 'next'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -31,6 +32,21 @@ export default async function CircleDetailPage({ params }: Props) {
     .single()
 
   if (!circle) notFound()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // 查询当前用户是否已加入
+  const { data: membership } = user
+    ? await supabase
+        .from('circle_members')
+        .select('user_id')
+        .eq('circle_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle()
+    : { data: null }
+
+  const isJoined = !!membership
+  const isOwner = user?.id === circle.owner_id
 
   // 取关联书的评论作为圈内讨论
   const { data: discussions } = circle.book_id
@@ -66,9 +82,19 @@ export default async function CircleDetailPage({ params }: Props) {
                 <p className="text-gray-600 text-sm mt-1">{circle.description}</p>
               )}
             </div>
-            <div className="text-center shrink-0">
-              <div className="text-2xl font-bold text-[--ink]">{circle.member_count}</div>
-              <div className="text-xs text-gray-400">成员</div>
+            <div className="shrink-0">
+              {user && !isOwner ? (
+                <JoinCircleButton
+                  circleId={id}
+                  initialJoined={isJoined}
+                  memberCount={circle.member_count}
+                />
+              ) : (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[--ink]">{circle.member_count}</div>
+                  <div className="text-xs text-gray-400">成员</div>
+                </div>
+              )}
             </div>
           </div>
 
