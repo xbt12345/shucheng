@@ -16,13 +16,15 @@ export default async function ReadPage({ params }: Props) {
     .from('books').select('id, title, file_url').eq('id', id).single()
   if (!book || !book.file_url) notFound()
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('books').getPublicUrl(book.file_url)
+  // 外链（http/https）直接用；Storage 相对路径才拼接 public URL
+  const fileUrl = book.file_url.startsWith('http')
+    ? book.file_url
+    : supabase.storage.from('books').getPublicUrl(book.file_url).data.publicUrl
 
   const isPdf = book.file_url.toLowerCase().endsWith('.pdf')
 
   if (isPdf) {
-    return <PdfReader pdfUrl={publicUrl} bookId={id} bookTitle={book.title} />
+    return <PdfReader pdfUrl={fileUrl} bookId={id} bookTitle={book.title} />
   }
 
   // epub 路径
@@ -37,7 +39,7 @@ export default async function ReadPage({ params }: Props) {
 
   return (
     <EpubReader
-      epubUrl={publicUrl}
+      epubUrl={fileUrl}
       bookId={id}
       initialCfi={log?.progress_cfi ?? undefined}
     />
